@@ -486,6 +486,184 @@
     color: var(--muted);
   }
 
+  /* ── JUKEBOX / WATCH & LISTEN ── */
+  .jukebox {
+    margin-top: 64px;
+    background: var(--ink);
+    color: var(--cream);
+    padding: 48px 36px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .jukebox::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(circle at 20% 10%, rgba(200,146,58,0.08), transparent 50%),
+                radial-gradient(circle at 80% 90%, rgba(196,66,26,0.08), transparent 50%);
+    pointer-events: none;
+  }
+
+  .jukebox-header {
+    text-align: center;
+    margin-bottom: 40px;
+    position: relative;
+  }
+
+  .jukebox-eyebrow {
+    font-family: 'Oswald', sans-serif;
+    font-size: 11px;
+    letter-spacing: 4px;
+    text-transform: uppercase;
+    color: var(--gold);
+    margin-bottom: 12px;
+  }
+
+  .jukebox h2 {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(32px, 5vw, 52px);
+    font-weight: 900;
+    line-height: 1;
+    letter-spacing: -1px;
+    margin-bottom: 14px;
+  }
+
+  .jukebox h2 em {
+    font-style: italic;
+    color: var(--gold-light);
+  }
+
+  .jukebox-subtitle {
+    font-style: italic;
+    color: rgba(245,240,232,0.7);
+    max-width: 520px;
+    margin: 0 auto;
+    font-size: 15px;
+  }
+
+  .jukebox-style {
+    margin-top: 40px;
+    position: relative;
+  }
+
+  .jukebox-style-header {
+    display: flex;
+    align-items: baseline;
+    gap: 14px;
+    margin-bottom: 18px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid rgba(200,146,58,0.3);
+  }
+
+  .jukebox-style-number {
+    font-family: 'Playfair Display', serif;
+    font-style: italic;
+    font-size: 28px;
+    color: var(--gold);
+    font-weight: 400;
+  }
+
+  .jukebox-style-name {
+    font-family: 'Oswald', sans-serif;
+    font-size: 18px;
+    font-weight: 600;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--cream);
+  }
+
+  .video-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 14px;
+  }
+
+  .video-card {
+    background: rgba(245,240,232,0.04);
+    border: 1px solid rgba(200,146,58,0.2);
+    padding: 18px 20px;
+    text-decoration: none;
+    color: inherit;
+    transition: all 0.3s;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    position: relative;
+  }
+
+  .video-card:hover {
+    background: rgba(200,146,58,0.08);
+    border-color: var(--gold);
+    transform: translateY(-2px);
+  }
+
+  .video-card-play {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-family: 'Oswald', sans-serif;
+    font-size: 10px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--rust);
+    margin-bottom: 4px;
+  }
+
+  .video-card-play-icon {
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    background: var(--rust);
+    color: var(--cream);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 9px;
+    padding-left: 2px;
+  }
+
+  .video-card:hover .video-card-play-icon {
+    background: var(--gold);
+    color: var(--ink);
+  }
+
+  .video-card-title {
+    font-family: 'Playfair Display', serif;
+    font-style: italic;
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--cream);
+    line-height: 1.2;
+  }
+
+  .video-card-artist {
+    font-family: 'Libre Baskerville', serif;
+    font-size: 13px;
+    color: rgba(245,240,232,0.75);
+  }
+
+  .video-card-note {
+    font-family: 'Oswald', sans-serif;
+    font-size: 10px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    color: var(--gold);
+    margin-top: 4px;
+  }
+
+  .jukebox-footnote {
+    margin-top: 36px;
+    padding-top: 20px;
+    border-top: 1px solid rgba(200,146,58,0.2);
+    text-align: center;
+    font-family: 'Oswald', sans-serif;
+    font-size: 10px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: rgba(245,240,232,0.5);
+  }
+
   /* ── TREE VISUALIZATION ── */
   .family-tree {
     margin-top: 48px;
@@ -567,6 +745,7 @@
   <a class="nav-pill" href="#colombiana">Colombian Salsa</a>
   <a class="nav-pill" href="#timba">Timba</a>
   <a class="nav-pill" href="#listening">Listening Guide</a>
+  <a class="nav-pill" href="#jukebox">Watch & Listen</a>
 </nav>
 
 <div class="article-container">
@@ -864,6 +1043,157 @@
     </div>
   </div>
 
+  <!-- ══ JUKEBOX / WATCH & LISTEN ══ -->
+  <div id="jukebox" class="jukebox">
+    <div class="jukebox-header">
+      <div class="jukebox-eyebrow">Watch & Listen</div>
+      <h2>The <em>Jukebox</em></h2>
+      <p class="jukebox-subtitle">Three essential tracks for every style — the historically important, the radio-famous, the dancer-favorite. All from official channels. Tap any card to open the video.</p>
+    </div>
+
+    <!-- ROOTS -->
+    <div class="jukebox-style">
+      <div class="jukebox-style-header">
+        <div class="jukebox-style-number">00</div>
+        <div class="jukebox-style-name">The Roots · Son Cubano</div>
+      </div>
+      <div class="video-grid">
+        <a class="video-card" href="https://www.youtube.com/watch?v=o5cELP06Mik" target="_blank" rel="noopener">
+          <div class="video-card-play"><span class="video-card-play-icon">▶</span> Play on YouTube</div>
+          <div class="video-card-title">Chan Chan</div>
+          <div class="video-card-artist">Buena Vista Social Club</div>
+          <div class="video-card-note">World Circuit · Official</div>
+        </a>
+        <a class="video-card" href="https://www.youtube.com/watch?v=VgjE24Xf0yM" target="_blank" rel="noopener">
+          <div class="video-card-play"><span class="video-card-play-icon">▶</span> Play on YouTube</div>
+          <div class="video-card-title">Bruca Manigua</div>
+          <div class="video-card-artist">Arsenio Rodríguez</div>
+          <div class="video-card-note">Columbia / Legacy · 1963</div>
+        </a>
+        <a class="video-card" href="https://www.youtube.com/watch?v=UXwLBS3yUkA" target="_blank" rel="noopener">
+          <div class="video-card-play"><span class="video-card-play-icon">▶</span> Play on YouTube</div>
+          <div class="video-card-title">Chan Chan (Live at Carnegie Hall)</div>
+          <div class="video-card-artist">Buena Vista Social Club</div>
+          <div class="video-card-note">World Circuit · Live</div>
+        </a>
+      </div>
+    </div>
+
+    <!-- SALSA DURA -->
+    <div class="jukebox-style">
+      <div class="jukebox-style-header">
+        <div class="jukebox-style-number">01</div>
+        <div class="jukebox-style-name">Salsa Dura</div>
+      </div>
+      <div class="video-grid">
+        <a class="video-card" href="https://www.youtube.com/watch?v=5LqnbAkqRYQ" target="_blank" rel="noopener">
+          <div class="video-card-play"><span class="video-card-play-icon">▶</span> Play on YouTube</div>
+          <div class="video-card-title">Pedro Navaja</div>
+          <div class="video-card-artist">Willie Colón & Rubén Blades</div>
+          <div class="video-card-note">Fania · Official Audio</div>
+        </a>
+        <a class="video-card" href="https://www.youtube.com/watch?v=PyLZYNB_kVs" target="_blank" rel="noopener">
+          <div class="video-card-play"><span class="video-card-play-icon">▶</span> Play on YouTube</div>
+          <div class="video-card-title">El Cantante</div>
+          <div class="video-card-artist">Héctor Lavoe</div>
+          <div class="video-card-note">Fania · Official</div>
+        </a>
+        <a class="video-card" href="https://www.youtube.com/watch?v=yRqzYM0Dw6E" target="_blank" rel="noopener">
+          <div class="video-card-play"><span class="video-card-play-icon">▶</span> Play on YouTube</div>
+          <div class="video-card-title">Quimbara</div>
+          <div class="video-card-artist">Celia Cruz & Johnny Pacheco</div>
+          <div class="video-card-note">Fania · Official Audio</div>
+        </a>
+      </div>
+    </div>
+
+    <!-- ROMÁNTICA -->
+    <div class="jukebox-style">
+      <div class="jukebox-style-header">
+        <div class="jukebox-style-number">02</div>
+        <div class="jukebox-style-name">Salsa Romántica</div>
+      </div>
+      <div class="video-grid">
+        <a class="video-card" href="https://www.youtube.com/watch?v=YXnjy5YlDwk" target="_blank" rel="noopener">
+          <div class="video-card-play"><span class="video-card-play-icon">▶</span> Play on YouTube</div>
+          <div class="video-card-title">Vivir Mi Vida</div>
+          <div class="video-card-artist">Marc Anthony</div>
+          <div class="video-card-note">Sony · Official Video</div>
+        </a>
+        <a class="video-card" href="https://www.youtube.com/watch?v=CO0g4WUObCE" target="_blank" rel="noopener">
+          <div class="video-card-play"><span class="video-card-play-icon">▶</span> Play on YouTube</div>
+          <div class="video-card-title">La Cura</div>
+          <div class="video-card-artist">Frankie Ruiz</div>
+          <div class="video-card-note">Universal Music Group</div>
+        </a>
+        <a class="video-card" href="https://www.youtube.com/watch?v=yJUWBm9EVSU" target="_blank" rel="noopener">
+          <div class="video-card-play"><span class="video-card-play-icon">▶</span> Play on YouTube</div>
+          <div class="video-card-title">Qué Locura Enamorarme De Ti</div>
+          <div class="video-card-artist">Eddie Santiago</div>
+          <div class="video-card-note">Universal Music Latino</div>
+        </a>
+      </div>
+    </div>
+
+    <!-- COLOMBIAN SALSA -->
+    <div class="jukebox-style">
+      <div class="jukebox-style-header">
+        <div class="jukebox-style-number">03</div>
+        <div class="jukebox-style-name">Colombian Salsa</div>
+      </div>
+      <div class="video-grid">
+        <a class="video-card" href="https://www.youtube.com/watch?v=7KxkMLAZlzw" target="_blank" rel="noopener">
+          <div class="video-card-play"><span class="video-card-play-icon">▶</span> Play on YouTube</div>
+          <div class="video-card-title">Cali Pachanguero</div>
+          <div class="video-card-artist">Grupo Niche</div>
+          <div class="video-card-note">Official Video</div>
+        </a>
+        <a class="video-card" href="https://www.youtube.com/watch?v=W8PTWqE2SVw" target="_blank" rel="noopener">
+          <div class="video-card-play"><span class="video-card-play-icon">▶</span> Play on YouTube</div>
+          <div class="video-card-title">Rebelión (No Le Pegue a La Negra)</div>
+          <div class="video-card-artist">Joe Arroyo</div>
+          <div class="video-card-note">Discos Fuentes · Official 4K</div>
+        </a>
+        <a class="video-card" href="https://www.youtube.com/watch?v=FN5oLBXiNvM" target="_blank" rel="noopener">
+          <div class="video-card-play"><span class="video-card-play-icon">▶</span> Play on YouTube</div>
+          <div class="video-card-title">El Preso</div>
+          <div class="video-card-artist">Fruko y sus Tesos</div>
+          <div class="video-card-note">Discos Fuentes · Official</div>
+        </a>
+      </div>
+    </div>
+
+    <!-- TIMBA -->
+    <div class="jukebox-style">
+      <div class="jukebox-style-header">
+        <div class="jukebox-style-number">04</div>
+        <div class="jukebox-style-name">Timba</div>
+      </div>
+      <div class="video-grid">
+        <a class="video-card" href="https://www.youtube.com/watch?v=EGabg9DgBPU" target="_blank" rel="noopener">
+          <div class="video-card-play"><span class="video-card-play-icon">▶</span> Play on YouTube</div>
+          <div class="video-card-title">Temba, Tumba, Timba</div>
+          <div class="video-card-artist">Los Van Van</div>
+          <div class="video-card-note">Llegó... Van Van · 1999</div>
+        </a>
+        <a class="video-card" href="https://www.youtube.com/watch?v=8iP9JDrfB2w" target="_blank" rel="noopener">
+          <div class="video-card-play"><span class="video-card-play-icon">▶</span> Play on YouTube</div>
+          <div class="video-card-title">La Expresiva</div>
+          <div class="video-card-artist">NG La Banda</div>
+          <div class="video-card-note">En La Calle · The Founding Track</div>
+        </a>
+        <a class="video-card" href="https://www.youtube.com/watch?v=zA6Xgk71ZGE" target="_blank" rel="noopener">
+          <div class="video-card-play"><span class="video-card-play-icon">▶</span> Play on YouTube</div>
+          <div class="video-card-title">La Fórmula</div>
+          <div class="video-card-artist">Issac Delgado</div>
+          <div class="video-card-note">Ahi-Nama Music · Official</div>
+        </a>
+      </div>
+    </div>
+
+    <div class="jukebox-footnote">All videos link to official artist or label channels · YouTube opens in a new tab</div>
+  </div>
+
   <!-- ══ HOW TO HEAR DIFFERENCES ══ -->
   <div class="style-card" style="border-top-color: var(--gold);">
     <div class="card-label">For the Dancer</div>
@@ -892,6 +1222,8 @@
 
 <footer class="guide-footer">
   The World of Salsa · A Complete Musical Guide · From Son Cubano to Timba
+  <br><br>
+  <span style="color: var(--gold); font-size: 10px; letter-spacing: 1.5px;">Created for fun by Joan Comas in 2026 from the park</span>
 </footer>
 
 </body>
