@@ -664,6 +664,80 @@
     color: rgba(245,240,232,0.5);
   }
 
+  /* ── INLINE HERO VIDEO (light variant for style cards) ── */
+  .hero-video {
+    display: block;
+    background: var(--ink);
+    padding: 18px 20px;
+    margin-bottom: 16px;
+    text-decoration: none;
+    color: var(--cream);
+    border-left: 3px solid var(--rust);
+    transition: all 0.3s;
+    position: relative;
+  }
+
+  .hero-video:hover {
+    background: #2a1f14;
+    border-left-color: var(--gold);
+    transform: translateX(2px);
+  }
+
+  .hero-video-label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-family: 'Oswald', sans-serif;
+    font-size: 10px;
+    letter-spacing: 2.5px;
+    text-transform: uppercase;
+    color: var(--gold);
+    margin-bottom: 10px;
+  }
+
+  .hero-video-icon {
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    background: var(--rust);
+    color: var(--cream);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 9px;
+    padding-left: 2px;
+  }
+
+  .hero-video:hover .hero-video-icon {
+    background: var(--gold);
+    color: var(--ink);
+  }
+
+  .hero-video-title {
+    font-family: 'Playfair Display', serif;
+    font-style: italic;
+    font-size: 22px;
+    font-weight: 700;
+    line-height: 1.15;
+    color: var(--cream);
+  }
+
+  .hero-video-artist {
+    font-family: 'Libre Baskerville', serif;
+    font-size: 13px;
+    color: rgba(245,240,232,0.75);
+    margin-top: 4px;
+  }
+
+  .hero-video-source {
+    font-family: 'Oswald', sans-serif;
+    font-size: 10px;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: var(--gold);
+    margin-top: 6px;
+  }
+
   /* ── TREE VISUALIZATION ── */
   .family-tree {
     margin-top: 48px;
@@ -811,6 +885,12 @@
       </div>
 
       <div>
+        <a class="hero-video" href="https://www.youtube.com/watch?v=5LqnbAkqRYQ" target="_blank" rel="noopener">
+          <div class="hero-video-label"><span class="hero-video-icon">▶</span> The Defining Track</div>
+          <div class="hero-video-title">Pedro Navaja</div>
+          <div class="hero-video-artist">Willie Colón & Rubén Blades</div>
+          <div class="hero-video-source">Fania · Official Audio</div>
+        </a>
         <div class="sidebar-box">
           <h4>Essential Artists</h4>
           <ul class="artist-list">
@@ -867,6 +947,12 @@
       </div>
 
       <div>
+        <a class="hero-video" href="https://www.youtube.com/watch?v=YXnjy5YlDwk" target="_blank" rel="noopener">
+          <div class="hero-video-label"><span class="hero-video-icon">▶</span> The Defining Track</div>
+          <div class="hero-video-title">Vivir Mi Vida</div>
+          <div class="hero-video-artist">Marc Anthony</div>
+          <div class="hero-video-source">Sony · Official Video</div>
+        </a>
         <div class="sidebar-box">
           <h4>Essential Artists</h4>
           <ul class="artist-list">
@@ -917,6 +1003,12 @@
       </div>
 
       <div>
+        <a class="hero-video" href="https://www.youtube.com/watch?v=7KxkMLAZlzw" target="_blank" rel="noopener">
+          <div class="hero-video-label"><span class="hero-video-icon">▶</span> The Defining Track</div>
+          <div class="hero-video-title">Cali Pachanguero</div>
+          <div class="hero-video-artist">Grupo Niche</div>
+          <div class="hero-video-source">Official Video</div>
+        </a>
         <div class="sidebar-box">
           <h4>Essential Artists</h4>
           <ul class="artist-list">
@@ -968,6 +1060,12 @@
       </div>
 
       <div>
+        <a class="hero-video" href="https://www.youtube.com/watch?v=EGabg9DgBPU" target="_blank" rel="noopener">
+          <div class="hero-video-label"><span class="hero-video-icon">▶</span> The Defining Track</div>
+          <div class="hero-video-title">Temba, Tumba, Timba</div>
+          <div class="hero-video-artist">Los Van Van</div>
+          <div class="hero-video-source">Llegó... Van Van · 1999</div>
+        </a>
         <div class="sidebar-box">
           <h4>Essential Artists</h4>
           <ul class="artist-list">
