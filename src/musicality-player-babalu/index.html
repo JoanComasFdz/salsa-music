@@ -338,15 +338,15 @@ function renderLegend() {
   });
 }
 
-// Split the current section's bars into groups of 4 for phrasing display
-function renderPhrasingGroups(bars = 4) {
+// Render the section-phrasing display as 2 groups of N dots (1 dot per phrase).
+function renderPhrasingGroups(dotsPerGroup = 4) {
   const row = document.getElementById("phrasingRow");
   row.innerHTML = "";
   for (let i = 0; i < 2; i++) {
     const g = document.createElement("div");
     g.className = "phrasing-group";
     g.id = `phrase${i}`;
-    for (let j = 0; j < bars; j++) g.innerHTML += '<div class="phrasing-dot"></div>';
+    for (let j = 0; j < dotsPerGroup; j++) g.innerHTML += '<div class="phrasing-dot"></div>';
     row.appendChild(g);
   }
 }
