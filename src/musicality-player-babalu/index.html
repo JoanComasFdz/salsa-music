@@ -156,8 +156,8 @@ const ASSET_BASE = `./assets/songs/${SONG_SLUG}`;
 // =============================================================================
 const SECTION_TYPES = ["intro", "verse", "chorus", "mambo", "breakdown", "bridge", "outro"];
 let breakdown = null;
-let timeline = [];          // flat list: { type, title, start, end, bars, frameworkOverrides }
-let totalBars = 0;
+let timeline = [];          // flat list: { type, title, startBeat, endBeat, beats, frameworkSegments }
+let totalBeats = 0;
 let audioCtx = null;
 let buffers = [];           // AudioBuffer per track
 let sources = [];           // Current AudioBufferSourceNode per track (recreated each play)
@@ -169,7 +169,7 @@ let startOffset = 0;        // position in song at time of play
 let totalDuration = 0;      // max track duration
 
 const SEC_PER_BEAT = () => 60 / SONG_META.bpm;
-const SEC_PER_BAR = () => SEC_PER_BEAT() * 4;  // 4 beats per bar musically; display shows 8-count across 2 bars
+const BEATS_PER_MEASURE = () => breakdown?.beatsPerMeasure || 8;
 
 // =============================================================================
 // HELPERS
@@ -253,38 +253,52 @@ async function loadAll() {
 
 function buildTimeline() {
   const secs = breakdown.sections;
-  let cursor = 0;
+  const beatsPerMeasure = BEATS_PER_MEASURE();
+  let cursor = 0;  // running beat index across the whole song
+
   timeline = secs.map(s => {
     const type = sectionKey(s.title);
-    // phrases can be: [4,4], [[ "Derecho", 8,8,8 ]], or nested combos.
-    let bars = 0;
-    const frameworkSegments = [];  // { start (bars), length (bars), framework }
-    const defaultFw = s.structure ? s.structure.toLowerCase() : null;
+    let beats = 0;
+    const frameworkSegments = [];  // { start (beats from section start), length (beats), framework }
+    let framework = s.structure ? s.structure.toLowerCase() : null;
 
     for (const phrase of s.phrases) {
-      if (Array.isArray(phrase)) {
-        // [frameworkLabel, barsCount1, barsCount2, ...]
-        const label = typeof phrase[0] === "string" ? phrase[0].toLowerCase() : defaultFw;
-        const counts = typeof phrase[0] === "string" ? phrase.slice(1) : phrase;
-        for (const c of counts) {
-          frameworkSegments.push({ start: bars, length: c, framework: label });
-          bars += c;
+      if (typeof phrase === "number") {
+        // N phrases of beatsPerMeasure beats each
+        for (let i = 0; i < phrase; i++) {
+          frameworkSegments.push({ start: beats, length: beatsPerMeasure, framework });
+          beats += beatsPerMeasure;
         }
-      } else {
-        // simple number = bars in default framework
-        frameworkSegments.push({ start: bars, length: phrase, framework: defaultFw });
-        bars += phrase;
+      } else if (Array.isArray(phrase)) {
+        // each item = one phrase. number = explicit beats. string = label + default-length phrase.
+        for (const item of phrase) {
+          if (typeof item === "string") {
+            framework = item.toLowerCase();
+            frameworkSegments.push({ start: beats, length: beatsPerMeasure, framework });
+            beats += beatsPerMeasure;
+          } else if (typeof item === "number") {
+            frameworkSegments.push({ start: beats, length: item, framework });
+            beats += item;
+          } else if (item && typeof item === "object") {
+            // { structure?, beats?, offset? } — Babalu does not use this, but support it defensively.
+            if (item.structure) framework = String(item.structure).toLowerCase();
+            const len = item.beats ?? beatsPerMeasure;
+            frameworkSegments.push({ start: beats, length: len, framework });
+            beats += len;
+          }
+        }
       }
     }
 
     const entry = {
-      type, title: s.title, startBar: cursor, endBar: cursor + bars,
-      bars, frameworkSegments,
+      type, title: s.title,
+      startBeat: cursor, endBeat: cursor + beats,
+      beats, frameworkSegments,
     };
-    cursor += bars;
+    cursor += beats;
     return entry;
   });
-  totalBars = cursor;
+  totalBeats = cursor;
 }
 
 // =============================================================================
@@ -304,10 +318,10 @@ function renderStrip() {
   timeline.forEach((s, i) => {
     const el = document.createElement("div");
     el.className = `block ${s.type}`;
-    el.style.flexGrow = s.bars;
-    el.title = `${s.title} — ${s.bars} bars`;
+    el.style.flexGrow = s.beats;
+    el.title = `${s.title} — ${s.beats} beats`;
     el.innerHTML = `<div class="progress-bar"></div>`;
-    el.addEventListener("click", () => seek(barToSeconds(s.startBar)));
+    el.addEventListener("click", () => seek(beatToSeconds(s.startBeat)));
     strip.appendChild(el);
   });
 }
@@ -356,7 +370,7 @@ function renderInstruments(defs) {
 // =============================================================================
 // PLAYBACK — Web Audio sample-accurate sync
 // =============================================================================
-function barToSeconds(bars) { return bars * SEC_PER_BAR(); }
+function beatToSeconds(beats) { return beats * SEC_PER_BEAT(); }
 
 function getCurrentTime() {
   if (!isPlaying) return startOffset;
@@ -416,13 +430,14 @@ function cacheDom() {
 function tick() {
   if (breakdown) {
     const t = getCurrentTime();
-    const barNow = t / SEC_PER_BAR();
+    const beatNow = t / SEC_PER_BEAT();
+    const beatsPerMeasure = BEATS_PER_MEASURE();
 
-    // Auto-pause at end
+    // Auto-pause at end of audio
     if (isPlaying && t >= totalDuration) pause();
 
     // Current section
-    const secIdx = timeline.findIndex(s => barNow >= s.startBar && barNow < s.endBar);
+    const secIdx = timeline.findIndex(s => beatNow >= s.startBeat && beatNow < s.endBeat);
     const sec = timeline[secIdx] || timeline[0];
 
     // Highlight block + show progress bar inside it
@@ -431,7 +446,7 @@ function tick() {
       const pb = b.querySelector(".progress-bar");
       if (i < secIdx) pb.style.width = "100%";
       else if (i > secIdx) pb.style.width = "0%";
-      else pb.style.width = `${((barNow - sec.startBar) / sec.bars) * 100}%`;
+      else pb.style.width = `${((beatNow - sec.startBeat) / sec.beats) * 100}%`;
     });
 
     // Legend chip
@@ -447,8 +462,8 @@ function tick() {
     document.getElementById("beatBar").style.color = color;
 
     // Framework within section
-    const barInSection = barNow - sec.startBar;
-    const fwSeg = sec.frameworkSegments.find(seg => barInSection >= seg.start && barInSection < seg.start + seg.length);
+    const beatInSection = beatNow - sec.startBeat;
+    const fwSeg = sec.frameworkSegments.find(seg => beatInSection >= seg.start && beatInSection < seg.start + seg.length);
     const fw = fwSeg?.framework || null;
     if (fw) {
       frameworkBar.style.background = color;
@@ -460,24 +475,25 @@ function tick() {
       frameworkLabel.textContent = "";
     }
 
-    // Beats — bachata shows 8-count spanning 2 musical bars
-    const beatInSection = Math.floor((barInSection * 4));    // 4 beats per bar
-    const count = beatInSection % 8;
+    // 8-count beat indicator — beatInSection is already in beats
+    const count = Math.floor(beatInSection) % beatsPerMeasure;
     beats.forEach((b, i) => {
       const on = i === count;
       b.classList.toggle("on", on);
       b.textContent = on ? (i+1) : "";
     });
 
-    // Phrasing — show current section's phrase groups, 4 bars per group, 2 groups
-    const phraseIdx = Math.floor(barInSection / 4) % 2;
-    const barInPhrase = Math.floor(barInSection) % 4;
+    // Phrasing — keep the existing 2-groups-of-4 layout, but index by phrase (= beatsPerMeasure beats).
+    // Each dot represents one phrase. Two groups alternate every 4 phrases within the section.
+    const phraseInSection = Math.floor(beatInSection / beatsPerMeasure);
+    const phraseIdx = Math.floor(phraseInSection / 4) % 2;
+    const dotInGroup = phraseInSection % 4;
     [0,1].forEach(i => {
       const g = document.getElementById(`phrase${i}`);
       if (!g) return;
       g.classList.toggle("active", i === phraseIdx);
       [...g.children].forEach((d, j) => {
-        d.classList.toggle("on", i === phraseIdx && j === barInPhrase);
+        d.classList.toggle("on", i === phraseIdx && j === dotInGroup);
       });
     });
 
