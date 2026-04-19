@@ -1,0 +1,58 @@
+{
+  "trim": 0.09,
+  "beatsPerMeasure": 8,
+  "tracks": [
+    "Vocals",
+    {
+      "title": "Bongo &amp; Gu&iuml;ra",
+      "groups": ["Percussion", "Rhythm"]
+    },
+    {
+      "title": "Percussion",
+      "groups": ["Percussion", "Rhythm"]
+    },
+    {
+      "title": "Kick Drum",
+      "groups": ["Percussion", "Rhythm"]
+    },
+    {
+      "title": "Bass Guitar",
+      "groups": ["Guitars", "Rhythm"]
+    },
+    {
+      "title": "Rhythm Guitar",
+      "groups": ["Guitars", "Rhythm"]
+    },
+    {
+      "title": "Lead Guitar",
+      "groups": "Guitars"
+    },
+    "keys &amp; Strings"
+  ],
+  "sections": [
+    { "title": "Intro", "phrases": [4] },
+    { "title": "Verse", "phrases": [4, 4] },
+    {
+      "title": "Chorus",
+      "phrases": [
+        ["Derecho", 8, 8, 8],
+        ["Majao", 8, 8, 8]
+      ]
+    },
+    { "title": "Verse", "phrases": [4] },
+    { "title": "Mambo", "structure": "Majao", "phrases": [4, 4] },
+    { "title": "Verse", "structure": "Derecho", "phrases": [4, 4] },
+    { "title": "Chorus", "structure": "Majao", "phrases": [4, 4] },
+    { "title": "Breakdown", "phrases": [4] },
+    { "title": "Bridge", "structure": "Derecho", "phrases": [4] },
+    { "title": "Breakdown", "phrases": [4] },
+    {
+      "title": "Chorus",
+      "phrases": [
+        ["Derecho", 8, 8, 8],
+        ["Majao", 8, 8, 8]
+      ]
+    },
+    { "title": "Outro", "phrases": [4] }
+  ]
+}

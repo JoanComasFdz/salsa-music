@@ -1,0 +1,511 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Musicality Breakdown — Babalu</title>
+<style>
+  :root {
+    --bg: #0d0d0f; --panel: #1a1a1e; --text: #e8e8ea; --muted: #7a7a80;
+    --intro: #22d3ee; --verse: #f97316; --chorus: #22c55e; --mambo: #2563eb;
+    --breakdown: #be185d; --bridge: #a21caf; --outro: #b91c1c;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+         background: var(--bg); color: var(--text); -webkit-font-smoothing: antialiased; }
+  .app { max-width: 640px; margin: 0 auto; padding: 16px; }
+  .loading { position: fixed; inset: 0; background: var(--bg); display: flex; align-items: center; justify-content: center; flex-direction: column; gap: 16px; z-index: 100; }
+  .loading.hidden { display: none; }
+  .spinner { width: 40px; height: 40px; border: 3px solid #333; border-top-color: var(--intro); border-radius: 50%; animation: spin 1s linear infinite; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .progress { font-size: 13px; color: var(--muted); font-variant-numeric: tabular-nums; }
+
+  /* Header */
+  .header { background: #2a2a2e; border-radius: 12px; padding: 14px; display: grid; grid-template-columns: 72px 1fr auto; gap: 12px; align-items: center; }
+  .cover { width: 72px; height: 72px; border-radius: 8px; background: #333; object-fit: cover; }
+  .meta .title { font-size: 20px; font-weight: 700; }
+  .meta .artist { color: #ccc; font-size: 13px; }
+  .meta .genre { color: var(--muted); font-size: 12px; }
+  .header-right { text-align: right; }
+  .bpm { background: #7dd3fc; color: #0c4a6e; font-size: 12px; font-weight: 700; padding: 4px 10px; border-radius: 8px; display: inline-block; }
+  .time { font-size: 22px; font-weight: 700; margin-top: 8px; font-variant-numeric: tabular-nums; }
+
+  .section-title { text-align: center; color: var(--muted); font-size: 12px; letter-spacing: 2px; margin: 28px 0 12px; font-weight: 600; }
+
+  /* Song structure strip */
+  .strip { display: flex; gap: 4px; padding: 0 4px; }
+  .block {
+    flex: 1 0 auto; height: 52px; border-radius: 10px; border: 2px solid currentColor;
+    background: color-mix(in srgb, currentColor 35%, transparent);
+    opacity: .55; transition: opacity .2s, transform .2s; cursor: pointer; position: relative; overflow: hidden;
+  }
+  .block.active { opacity: 1; transform: scaleY(1.05); box-shadow: 0 0 12px currentColor; }
+  .block .progress-bar { position: absolute; left: 0; top: 0; bottom: 0; background: color-mix(in srgb, currentColor 60%, #fff 10%); width: 0; transition: width .1s linear; }
+  .block.intro { color: var(--intro); } .block.verse { color: var(--verse); }
+  .block.chorus { color: var(--chorus); } .block.mambo { color: var(--mambo); }
+  .block.breakdown { color: var(--breakdown); } .block.bridge { color: var(--bridge); } .block.outro { color: var(--outro); }
+
+  /* Legend */
+  .legend { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; margin-top: 14px; }
+  .chip { padding: 8px 16px; border-radius: 10px; border: 2px solid currentColor; background: color-mix(in srgb, currentColor 18%, transparent); font-weight: 600; font-size: 14px; color: currentColor; }
+  .chip .label { color: var(--text); }
+  .chip.dim { opacity: .45; }
+  .chip.active { box-shadow: 0 0 10px currentColor; }
+
+  /* Framework indicator */
+  #frameworkBar { display: inline-block; height: 4px; border-radius: 2px; transition: all .3s; }
+  #frameworkLabel { color: var(--muted); font-size: 11px; margin-top: 6px; letter-spacing: 1px; }
+
+  /* Phrasing */
+  .phrasing-row { display: flex; gap: 16px; justify-content: center; flex-wrap: wrap; }
+  .phrasing-group { display: flex; gap: 10px; padding: 10px 16px; border: 2px solid currentColor; border-radius: 999px; background: color-mix(in srgb, currentColor 15%, transparent); color: var(--muted); }
+  .phrasing-group.active { color: var(--intro); }
+  .phrasing-dot { width: 28px; height: 28px; border-radius: 50%; border: 2px solid currentColor; background: transparent; transition: background .15s; }
+  .phrasing-dot.on { background: currentColor; box-shadow: 0 0 10px currentColor; }
+
+  /* Beats */
+  .beats { display: flex; justify-content: center; }
+  .beat-bar { display: flex; gap: 8px; padding: 10px 16px; border: 2px solid currentColor; border-radius: 999px; background: color-mix(in srgb, currentColor 15%, transparent); color: var(--intro); }
+  .beat { width: 32px; height: 32px; border-radius: 50%; border: 2px solid currentColor; display: flex; align-items: center; justify-content: center; font-weight: 700; color: transparent; transition: all .1s; }
+  .beat.on { background: currentColor; color: #0d0d0f; box-shadow: 0 0 14px currentColor; transform: scale(1.15); }
+
+  /* Instruments */
+  .instruments { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 14px; }
+  .instrument { background: transparent; border: 1px solid #3a3a40; border-radius: 10px; padding: 10px 14px; display: flex; align-items: center; gap: 10px; cursor: pointer; user-select: none; font-size: 14px; }
+  .toggle { width: 36px; height: 20px; border-radius: 999px; background: #3a3a40; position: relative; transition: background .2s; flex-shrink: 0; }
+  .toggle::after { content: ''; position: absolute; top: 2px; left: 2px; width: 16px; height: 16px; border-radius: 50%; background: #fff; transition: left .2s; }
+  .instrument.on .toggle { background: #3b82f6; }
+  .instrument.on .toggle::after { left: 18px; }
+
+  /* Playback bar */
+  .playbar { margin-top: 24px; padding: 14px; border-radius: 14px; background: #1e3a8a22; display: flex; align-items: center; justify-content: center; gap: 20px; }
+  .playbar button { background: transparent; border: none; color: var(--text); font-size: 24px; cursor: pointer; padding: 8px; }
+  .playbar .clock { font-variant-numeric: tabular-nums; }
+</style>
+</head>
+<body>
+
+<div class="loading" id="loading">
+  <div class="spinner"></div>
+  <div class="progress" id="loadingText">Loading metadata…</div>
+</div>
+
+<div class="app">
+
+  <div class="header">
+    <img class="cover" id="cover" alt="" />
+    <div class="meta">
+      <div class="title" id="songTitle">…</div>
+      <div class="artist" id="songArtist">…</div>
+      <div class="genre" id="songGenre">…</div>
+    </div>
+    <div class="header-right">
+      <div class="bpm" id="bpmLabel">– bpm</div>
+      <div class="time" id="timeLabel">00:00</div>
+    </div>
+  </div>
+
+  <div class="section-title">SONG STRUCTURE</div>
+  <div class="strip" id="strip"></div>
+
+  <div class="legend" id="legend"></div>
+
+  <div class="section-title">RHYTHM / FRAMEWORK</div>
+  <div style="text-align:center">
+    <span id="frameworkBar" style="width:40px; background:#444;"></span>
+    <div id="frameworkLabel"></div>
+  </div>
+
+  <div class="section-title">SECTION PHRASING</div>
+  <div class="phrasing-row" id="phrasingRow"></div>
+
+  <div class="section-title">BEATS / COUNTS</div>
+  <div class="beats">
+    <div class="beat-bar" id="beatBar">
+      <div class="beat">1</div><div class="beat">2</div><div class="beat">3</div><div class="beat">4</div>
+      <div class="beat">5</div><div class="beat">6</div><div class="beat">7</div><div class="beat">8</div>
+    </div>
+  </div>
+
+  <div class="section-title">INSTRUMENTS</div>
+  <div class="instruments" id="instruments"></div>
+
+  <div class="playbar">
+    <button id="playBtn" title="Play/Pause">▶</button>
+    <button id="resetBtn" title="Restart">⏮</button>
+    <span class="clock" id="clock">00:00 / 00:00</span>
+  </div>
+</div>
+
+<script>
+// =============================================================================
+// SONG DEFINITION — identical to what emusicality.co.uk serves.
+// For a different song, change SONG_SLUG and point SONG_META to its songs.json entry.
+// =============================================================================
+const SONG_SLUG = "babalu";
+const SONG_META = {
+  title: "Babalu",
+  artist: "J-Style & DJ Tronky (feat Blaze & Stella)",
+  genre: "Bachata",
+  bpm: 132,
+};
+const ASSET_BASE = `./assets/songs/${SONG_SLUG}`;
+
+// =============================================================================
+// STATE
+// =============================================================================
+const SECTION_TYPES = ["intro", "verse", "chorus", "mambo", "breakdown", "bridge", "outro"];
+let breakdown = null;
+let timeline = [];          // flat list: { type, title, start, end, bars, frameworkOverrides }
+let totalBars = 0;
+let audioCtx = null;
+let buffers = [];           // AudioBuffer per track
+let sources = [];           // Current AudioBufferSourceNode per track (recreated each play)
+let gains = [];             // GainNode per track (for mute/unmute)
+let instrumentState = [];   // bool per track
+let isPlaying = false;
+let startCtxTime = 0;       // audioCtx.currentTime when we hit play
+let startOffset = 0;        // position in song at time of play
+let totalDuration = 0;      // max track duration
+
+const SEC_PER_BEAT = () => 60 / SONG_META.bpm;
+const SEC_PER_BAR = () => SEC_PER_BEAT() * 4;  // 4 beats per bar musically; display shows 8-count across 2 bars
+
+// =============================================================================
+// HELPERS
+// =============================================================================
+function decodeEntities(s) {
+  const el = document.createElement("textarea");
+  el.innerHTML = s;
+  return el.value;
+}
+function fmt(s) {
+  if (!isFinite(s) || s < 0) s = 0;
+  const m = String(Math.floor(s/60)).padStart(2,"0");
+  const sec = String(Math.floor(s%60)).padStart(2,"0");
+  return `${m}:${sec}`;
+}
+function sectionKey(title) {
+  const k = title.toLowerCase();
+  return SECTION_TYPES.includes(k) ? k : "intro";
+}
+
+// =============================================================================
+// LOAD METADATA + AUDIO
+// =============================================================================
+async function loadAll() {
+  const lt = document.getElementById("loadingText");
+
+  lt.textContent = "Loading metadata…";
+  const res = await fetch(`${ASSET_BASE}/breakdown.json`);
+  breakdown = await res.json();
+
+  // Resolve track definitions — each entry is string or {title, groups, trim}
+  const trackDefs = breakdown.tracks.map((t, i) => {
+    if (typeof t === "string") return { id: i, title: decodeEntities(t), groups: [], trim: 0 };
+    return {
+      id: i,
+      title: decodeEntities(t.title),
+      groups: typeof t.groups === "string" ? [t.groups] : (t.groups || []),
+      trim: t.trim || 0,
+    };
+  });
+  instrumentState = trackDefs.map(() => true);
+
+  // Build timeline from sections/phrases
+  buildTimeline();
+
+  // Render static UI
+  renderHeader();
+  renderStrip();
+  renderLegend();
+  renderPhrasingGroups();
+  renderInstruments(trackDefs);
+
+  // Init Web Audio
+  audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+
+  // Load all stems in parallel
+  const total = trackDefs.length;
+  const urls = trackDefs.map(t => `${ASSET_BASE}/track${t.id}.trk`);
+  let done = 0;
+  buffers = await Promise.all(urls.map(async (url, i) => {
+    const r = await fetch(url);
+    const ab = await r.arrayBuffer();
+    const buf = await audioCtx.decodeAudioData(ab);
+    done++;
+    lt.textContent = `Loading stems… ${done}/${total}`;
+    return buf;
+  }));
+
+  totalDuration = Math.max(...buffers.map(b => b.duration));
+
+  // Create persistent gain nodes for each track
+  gains = buffers.map((_, i) => {
+    const g = audioCtx.createGain();
+    g.gain.value = 1;
+    g.connect(audioCtx.destination);
+    return g;
+  });
+
+  document.getElementById("loading").classList.add("hidden");
+}
+
+function buildTimeline() {
+  const secs = breakdown.sections;
+  let cursor = 0;
+  timeline = secs.map(s => {
+    const type = sectionKey(s.title);
+    // phrases can be: [4,4], [[ "Derecho", 8,8,8 ]], or nested combos.
+    let bars = 0;
+    const frameworkSegments = [];  // { start (bars), length (bars), framework }
+    const defaultFw = s.structure ? s.structure.toLowerCase() : null;
+
+    for (const phrase of s.phrases) {
+      if (Array.isArray(phrase)) {
+        // [frameworkLabel, barsCount1, barsCount2, ...]
+        const label = typeof phrase[0] === "string" ? phrase[0].toLowerCase() : defaultFw;
+        const counts = typeof phrase[0] === "string" ? phrase.slice(1) : phrase;
+        for (const c of counts) {
+          frameworkSegments.push({ start: bars, length: c, framework: label });
+          bars += c;
+        }
+      } else {
+        // simple number = bars in default framework
+        frameworkSegments.push({ start: bars, length: phrase, framework: defaultFw });
+        bars += phrase;
+      }
+    }
+
+    const entry = {
+      type, title: s.title, startBar: cursor, endBar: cursor + bars,
+      bars, frameworkSegments,
+    };
+    cursor += bars;
+    return entry;
+  });
+  totalBars = cursor;
+}
+
+// =============================================================================
+// RENDERING
+// =============================================================================
+function renderHeader() {
+  document.getElementById("cover").src = `${ASSET_BASE}/cover.jpg`;
+  document.getElementById("songTitle").textContent = decodeEntities(SONG_META.title);
+  document.getElementById("songArtist").textContent = decodeEntities(SONG_META.artist);
+  document.getElementById("songGenre").textContent = SONG_META.genre;
+  document.getElementById("bpmLabel").textContent = `${SONG_META.bpm}bpm`;
+}
+
+function renderStrip() {
+  const strip = document.getElementById("strip");
+  strip.innerHTML = "";
+  timeline.forEach((s, i) => {
+    const el = document.createElement("div");
+    el.className = `block ${s.type}`;
+    el.style.flexGrow = s.bars;
+    el.title = `${s.title} — ${s.bars} bars`;
+    el.innerHTML = `<div class="progress-bar"></div>`;
+    el.addEventListener("click", () => seek(barToSeconds(s.startBar)));
+    strip.appendChild(el);
+  });
+}
+
+function renderLegend() {
+  const legend = document.getElementById("legend");
+  SECTION_TYPES.forEach(type => {
+    const chip = document.createElement("div");
+    chip.className = `chip dim ${type}`;
+    chip.style.color = `var(--${type})`;
+    chip.innerHTML = `<span class="label">${type[0].toUpperCase()+type.slice(1)}</span>`;
+    chip.dataset.type = type;
+    legend.appendChild(chip);
+  });
+}
+
+// Split the current section's bars into groups of 4 for phrasing display
+function renderPhrasingGroups(bars = 4) {
+  const row = document.getElementById("phrasingRow");
+  row.innerHTML = "";
+  for (let i = 0; i < 2; i++) {
+    const g = document.createElement("div");
+    g.className = "phrasing-group";
+    g.id = `phrase${i}`;
+    for (let j = 0; j < bars; j++) g.innerHTML += '<div class="phrasing-dot"></div>';
+    row.appendChild(g);
+  }
+}
+
+function renderInstruments(defs) {
+  const panel = document.getElementById("instruments");
+  panel.innerHTML = "";
+  defs.forEach((def, i) => {
+    const el = document.createElement("div");
+    el.className = "instrument on";
+    el.innerHTML = `<div class="toggle"></div><span>${def.title}</span>`;
+    el.addEventListener("click", () => {
+      instrumentState[i] = !instrumentState[i];
+      el.classList.toggle("on", instrumentState[i]);
+      if (gains[i]) gains[i].gain.value = instrumentState[i] ? 1 : 0;
+    });
+    panel.appendChild(el);
+  });
+}
+
+// =============================================================================
+// PLAYBACK — Web Audio sample-accurate sync
+// =============================================================================
+function barToSeconds(bars) { return bars * SEC_PER_BAR(); }
+
+function getCurrentTime() {
+  if (!isPlaying) return startOffset;
+  return startOffset + (audioCtx.currentTime - startCtxTime);
+}
+
+function play() {
+  if (isPlaying) return;
+  if (audioCtx.state === "suspended") audioCtx.resume();
+
+  const offset = startOffset + (breakdown.trim || 0);
+
+  sources = buffers.map((buf, i) => {
+    const src = audioCtx.createBufferSource();
+    src.buffer = buf;
+    src.connect(gains[i]);
+    src.start(0, Math.max(0, offset));
+    return src;
+  });
+
+  startCtxTime = audioCtx.currentTime;
+  isPlaying = true;
+  document.getElementById("playBtn").textContent = "⏸";
+}
+
+function pause() {
+  if (!isPlaying) return;
+  startOffset = getCurrentTime();
+  sources.forEach(s => { try { s.stop(); } catch(e){} });
+  sources = [];
+  isPlaying = false;
+  document.getElementById("playBtn").textContent = "▶";
+}
+
+function seek(seconds) {
+  const wasPlaying = isPlaying;
+  if (wasPlaying) pause();
+  startOffset = Math.max(0, Math.min(seconds, totalDuration));
+  if (wasPlaying) play();
+}
+
+// =============================================================================
+// TICK — drives the whole UI off getCurrentTime()
+// =============================================================================
+let blocks, chips, beats, frameworkBar, frameworkLabel, timeLabel, clock;
+
+function cacheDom() {
+  blocks = [...document.querySelectorAll(".block")];
+  chips = [...document.querySelectorAll(".chip")];
+  beats = [...document.querySelectorAll(".beat")];
+  frameworkBar = document.getElementById("frameworkBar");
+  frameworkLabel = document.getElementById("frameworkLabel");
+  timeLabel = document.getElementById("timeLabel");
+  clock = document.getElementById("clock");
+}
+
+function tick() {
+  if (breakdown) {
+    const t = getCurrentTime();
+    const barNow = t / SEC_PER_BAR();
+
+    // Auto-pause at end
+    if (isPlaying && t >= totalDuration) pause();
+
+    // Current section
+    const secIdx = timeline.findIndex(s => barNow >= s.startBar && barNow < s.endBar);
+    const sec = timeline[secIdx] || timeline[0];
+
+    // Highlight block + show progress bar inside it
+    blocks.forEach((b, i) => {
+      b.classList.toggle("active", i === secIdx);
+      const pb = b.querySelector(".progress-bar");
+      if (i < secIdx) pb.style.width = "100%";
+      else if (i > secIdx) pb.style.width = "0%";
+      else pb.style.width = `${((barNow - sec.startBar) / sec.bars) * 100}%`;
+    });
+
+    // Legend chip
+    chips.forEach(c => {
+      const active = c.dataset.type === sec.type;
+      c.classList.toggle("active", active);
+      c.classList.toggle("dim", !active);
+    });
+
+    // Color the phrasing + beats to match section
+    const color = `var(--${sec.type})`;
+    document.querySelectorAll(".phrasing-group").forEach(g => g.style.color = color);
+    document.getElementById("beatBar").style.color = color;
+
+    // Framework within section
+    const barInSection = barNow - sec.startBar;
+    const fwSeg = sec.frameworkSegments.find(seg => barInSection >= seg.start && barInSection < seg.start + seg.length);
+    const fw = fwSeg?.framework || null;
+    if (fw) {
+      frameworkBar.style.background = color;
+      frameworkBar.style.width = "80px";
+      frameworkLabel.textContent = fw.toUpperCase();
+    } else {
+      frameworkBar.style.background = "#444";
+      frameworkBar.style.width = "40px";
+      frameworkLabel.textContent = "";
+    }
+
+    // Beats — bachata shows 8-count spanning 2 musical bars
+    const beatInSection = Math.floor((barInSection * 4));    // 4 beats per bar
+    const count = beatInSection % 8;
+    beats.forEach((b, i) => {
+      const on = i === count;
+      b.classList.toggle("on", on);
+      b.textContent = on ? (i+1) : "";
+    });
+
+    // Phrasing — show current section's phrase groups, 4 bars per group, 2 groups
+    const phraseIdx = Math.floor(barInSection / 4) % 2;
+    const barInPhrase = Math.floor(barInSection) % 4;
+    [0,1].forEach(i => {
+      const g = document.getElementById(`phrase${i}`);
+      if (!g) return;
+      g.classList.toggle("active", i === phraseIdx);
+      [...g.children].forEach((d, j) => {
+        d.classList.toggle("on", i === phraseIdx && j === barInPhrase);
+      });
+    });
+
+    // Clock
+    timeLabel.textContent = fmt(t);
+    clock.textContent = `${fmt(t)} / ${fmt(totalDuration)}`;
+  }
+  requestAnimationFrame(tick);
+}
+
+// =============================================================================
+// EVENTS
+// =============================================================================
+document.getElementById("playBtn").addEventListener("click", () => isPlaying ? pause() : play());
+document.getElementById("resetBtn").addEventListener("click", () => seek(0));
+
+// =============================================================================
+// GO
+// =============================================================================
+loadAll().then(() => {
+  cacheDom();
+  requestAnimationFrame(tick);
+}).catch(err => {
+  document.getElementById("loadingText").innerHTML =
+    `Error: ${err.message}<br><br>` +
+    `Serve this folder with a local web server (file:// won't work due to CORS).<br>` +
+    `Try: <code>python3 -m http.server</code> in this folder, then open <code>http://localhost:8000</code>`;
+});
+</script>
+</body>
+</html>
