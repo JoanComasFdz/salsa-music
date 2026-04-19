@@ -54,7 +54,7 @@ The UI uses `audioCtx.currentTime` as the clock, so sync is perfect.
 ```json
 {
   "trim": 0.09,                  // global audio offset (seconds)
-  "beatsPerMeasure": 8,          // bachata uses 8-count display
+  "beatsPerMeasure": 8,          // beats per phrase (bachata uses 8-count)
   "tracks": [
     "Vocals",                     // simple string = track name, no groups
     {
@@ -64,13 +64,13 @@ The UI uses `audioCtx.currentTime` as the clock, so sync is perfect.
     ...
   ],
   "sections": [
-    { "title": "Intro", "phrases": [4] },                     // 4-bar phrase
-    { "title": "Verse", "phrases": [4, 4] },                  // two 4-bar phrases
+    { "title": "Intro", "phrases": [4] },                     // 4 phrases × 8 beats = 32 beats
+    { "title": "Verse", "phrases": [4, 4] },                  // two groups of 4 phrases (32 + 32 = 64 beats)
     {
       "title": "Chorus",
       "phrases": [
-        ["Derecho", 8, 8, 8],     // sub-phrases with framework label
-        ["Majao",   8, 8, 8]
+        ["Derecho", 8, 8, 8],     // explicit-beat phrases with framework label:
+        ["Majao",   8, 8, 8]      // each = 4 phrases × 8 beats = 32 beats
       ]
     },
     {
@@ -81,3 +81,11 @@ The UI uses `audioCtx.currentTime` as the clock, so sync is perfect.
   ]
 }
 ```
+
+**`phrases` reading rules** (matches the original emusicality.co.uk player):
+
+- A bare **number `N`** means *N phrases of `beatsPerMeasure` beats each*. So `[4]` at `beatsPerMeasure: 8` is 32 beats, not 4 bars.
+- An **array** lists phrases item-by-item:
+  - A **number** is the explicit beat count of that phrase.
+  - A **string** sets the framework label (e.g. `"Derecho"`, `"Majao"`) *and* adds one phrase of `beatsPerMeasure` beats with that label.
+- Section length is the sum of all its phrase beats. Seconds = `beats × 60 / bpm`.
