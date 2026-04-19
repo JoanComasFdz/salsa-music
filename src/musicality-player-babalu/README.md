@@ -65,7 +65,7 @@ The UI uses `audioCtx.currentTime` as the clock, so sync is perfect.
   ],
   "sections": [
     { "title": "Intro", "phrases": [4] },                     // 4 phrases × 8 beats = 32 beats
-    { "title": "Verse", "phrases": [4, 4] },                  // two groups of 4 phrases (32 + 32 = 64 beats)
+    { "title": "Verse", "phrases": [4, 4] },                  // 4 + 4 = 8 phrases × 8 beats = 64 beats (equivalent to [8])
     {
       "title": "Chorus",
       "phrases": [
@@ -85,7 +85,7 @@ The UI uses `audioCtx.currentTime` as the clock, so sync is perfect.
 **`phrases` reading rules** (matches the original emusicality.co.uk player):
 
 - A bare **number `N`** means *N phrases of `beatsPerMeasure` beats each*. So `[4]` at `beatsPerMeasure: 8` is 32 beats, not 4 bars.
-- An **array** lists phrases item-by-item:
-  - A **number** is the explicit beat count of that phrase.
+- An **array** lists phrases item-by-item. Each item produces one phrase:
+  - A **number** sets that phrase's explicit beat count.
   - A **string** sets the framework label (e.g. `"Derecho"`, `"Majao"`) *and* adds one phrase of `beatsPerMeasure` beats with that label.
 - Section length is the sum of all its phrase beats. Seconds = `beats × 60 / bpm`.
