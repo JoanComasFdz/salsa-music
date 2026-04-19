@@ -72,7 +72,7 @@ Layout:
 How it works:
 - All 8 stems are fetched, decoded to `AudioBuffer`s, and started in the same JS tick via `AudioBufferSourceNode.start()` — the Web Audio API schedules them sample-accurately, and `audioCtx.currentTime` drives the UI clock. Mute/unmute toggles `gainNode.gain.value` without touching the sources, so sync is preserved.
 - The active song is selected by the `SONG_SLUG` + `SONG_META` constants near the top of `index.html` (around line 145). Adding another song means creating `assets/songs/<slug>/` with a matching `breakdown.json` + stems, then updating those two constants.
-- `breakdown.json` schema (summary): `trim` (global audio offset seconds), `beatsPerMeasure`, `tracks` (array of strings *or* `{title, groups}` objects), `sections` (array of `{title, phrases, structure?}` where `phrases` entries are either bar counts or `[frameworkLabel, ...barCounts]` for framework-labeled sub-phrases). Full schema in the project's own `README.md`.
+- `breakdown.json` schema (summary): `trim` (global audio offset seconds), `beatsPerMeasure` (beats per phrase, e.g. 8 for bachata), `tracks` (array of strings *or* `{title, groups}` objects), `sections` (array of `{title, phrases, structure?}` where each `phrases` entry is either a number `N` meaning *N phrases of `beatsPerMeasure` beats each*, or `[frameworkLabel, ...beatCounts]` listing explicit beat counts under that framework label). Full schema in the project's own `README.md`.
 
 Running it: needs a local HTTP server (CORS blocks `fetch()` on `file://`). Either right-click `index.html` → "Open with Live Server" in VS Code, or `cd src/musicality-player-babalu && python3 -m http.server 8000`.
 
